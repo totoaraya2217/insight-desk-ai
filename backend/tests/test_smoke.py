@@ -10,6 +10,7 @@ def test_app_registers_spec_routes():
     assert set(paths["/api/productos"]) == {"get", "post"}
     assert set(paths["/api/ventas"]) == {"get", "post"}
     assert set(paths["/api/indicadores"]) == {"get"}
+    assert set(paths["/api/agente/chat"]) == {"post"}
     assert "/api/health" in paths
 
 

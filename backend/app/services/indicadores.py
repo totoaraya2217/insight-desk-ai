@@ -30,6 +30,42 @@ def ventas_por_categoria(db: Session) -> list[VentasCategoria]:
     ]
 
 
+def ventas_por_producto(db: Session) -> list[dict]:
+    """Todos los productos, incluidos los que no tienen ventas (ingresos 0), de mayor a menor ingreso."""
+    ingresos = func.coalesce(func.sum(_importe), 0.0).label("ingresos")
+    stmt = (
+        select(
+            Producto.id,
+            Producto.nombre,
+            Producto.categoria,
+            Producto.precio,
+            func.count(Venta.id),
+            func.coalesce(func.sum(Venta.cantidad), 0),
+            ingresos,
+        )
+        .outerjoin(Venta, Venta.producto_id == Producto.id)
+        .group_by(Producto.id)
+        .order_by(ingresos.desc(), Producto.nombre)
+    )
+    return [
+        {
+            "producto_id": pid,
+            "nombre": nombre,
+            "categoria": cat,
+            "precio_actual": precio,
+            "num_ventas": n,
+            "cantidad_vendida": int(cant),
+            "ingresos": _dinero(ing),
+        }
+        for pid, nombre, cat, precio, n, cant, ing in db.execute(stmt)
+    ]
+
+
+def rango_fechas(db: Session) -> tuple[str | None, str | None]:
+    primera, ultima = db.execute(select(func.min(Venta.fecha), func.max(Venta.fecha))).one()
+    return (primera.isoformat() if primera else None, ultima.isoformat() if ultima else None)
+
+
 def calcular_indicadores(db: Session) -> Indicadores:
     n, cantidad, ingresos = db.execute(
         select(func.count(Venta.id), func.coalesce(func.sum(Venta.cantidad), 0), func.coalesce(func.sum(_importe), 0.0))

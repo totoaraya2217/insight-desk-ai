@@ -35,4 +35,5 @@ export const api = {
   ventas: (limit = 10) => request("/ventas", { params: { limit } }),
   crearVenta: (venta) => request("/ventas", { method: "POST", body: venta }),
   indicadores: () => request("/indicadores"),
+  chat: (mensaje, historial) => request("/agente/chat", { method: "POST", body: { mensaje, historial } }),
 };

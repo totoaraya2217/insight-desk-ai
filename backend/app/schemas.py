@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator
 
@@ -64,3 +64,29 @@ class Indicadores(BaseModel):
     ingresos: float
     ticket_promedio: float | None = Field(description="Ingresos / número de ventas; null si no hay ventas.")
     ventas_por_categoria: list[VentasCategoria]
+
+
+# --- Agente ---
+TextoChat = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]
+
+
+class TurnoChat(_Entrada):
+    rol: Literal["usuario", "modelo"]
+    texto: Annotated[str, StringConstraints(min_length=1, max_length=4000)]
+
+
+class SolicitudChat(_Entrada):
+    mensaje: TextoChat
+    historial: list[TurnoChat] = Field(default_factory=list, max_length=20)
+
+
+class LlamadaHerramienta(BaseModel):
+    nombre: str
+    argumentos: dict[str, Any]
+    resultado: Any
+
+
+class RespuestaChat(BaseModel):
+    respuesta: str
+    herramientas_usadas: list[LlamadaHerramienta]
+    fundamentada: bool = Field(description="True si la respuesta se apoyó en al menos una consulta a datos.")

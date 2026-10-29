@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from .config import settings
 from .database import init_db
 from .errors import NoEncontradoError, ReglaNegocioError
-from .routers import indicadores, productos, ventas
+from .routers import agente, indicadores, productos, ventas
 
 
 @asynccontextmanager
@@ -48,5 +48,5 @@ def health() -> dict:
     return {"status": "ok", "agent_configured": bool(settings.gemini_api_key)}
 
 
-for r in (productos.router, ventas.router, indicadores.router):
+for r in (productos.router, ventas.router, indicadores.router, agente.router):
     app.include_router(r)

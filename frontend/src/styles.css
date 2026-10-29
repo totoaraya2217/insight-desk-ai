@@ -214,11 +214,7 @@ input:focus, select:focus, textarea:focus, .btn:focus-visible {
   top: 24px;
   height: calc(100vh - 48px - 60px);
 }
-.agent-body { flex: 1; color: var(--text-secondary); font-size: 0.92rem; }
-.agent-body p { margin: 0 0 8px; }
-.sugerencias { margin: 0 0 16px; padding-left: 18px; }
-.sugerencias li { margin-bottom: 4px; }
-.agent-input { display: flex; flex-direction: column; gap: 8px; }
+.agent-input { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
 .agent-input textarea { resize: none; }
 .badge {
   font-size: 0.75rem;
@@ -228,6 +224,50 @@ input:focus, select:focus, textarea:focus, .btn:focus-visible {
   color: var(--text-muted);
   white-space: nowrap;
 }
+.badge-ok { color: var(--ok-text); background: var(--ok-bg); border-color: transparent; }
+.badge-error { color: var(--err-text); background: var(--err-bg); border-color: transparent; }
+
+/* --- Chat --- */
+.chat {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 2px 12px;
+}
+.chat-vacio p { margin: 0 0 10px; }
+.sugerencias { display: flex; flex-direction: column; gap: 8px; }
+.chip {
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); }
+.burbuja {
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.burbuja-usuario { align-self: flex-end; background: var(--accent); color: var(--accent-text); border-bottom-right-radius: 4px; max-width: 88%; white-space: pre-wrap; }
+.burbuja-modelo { align-self: flex-start; background: var(--bg); border: 1px solid var(--border); border-bottom-left-radius: 4px; display: flex; flex-direction: column; gap: 6px; }
+.burbuja-modelo:has(.spinner) { flex-direction: row; align-items: center; gap: 8px; }
+.burbuja-error { align-self: flex-start; background: var(--err-bg); color: var(--err-text); }
+.texto-agente p { margin: 0 0 6px; }
+.texto-agente p:last-child { margin-bottom: 0; }
+.texto-agente ul { margin: 0 0 6px; padding-left: 18px; }
+.texto-agente li { margin-bottom: 3px; }
+.fuentes { margin: 0; font-size: 0.75rem; color: var(--text-muted); }
+.fuentes-aviso { color: var(--err-text); }
 
 /* --- Responsivo --- */
 @media (max-width: 1100px) {

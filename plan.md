@@ -56,12 +56,26 @@
 - `pytest` backend: 25/25 OK (sin cambios en backend).
 - Recharts se mantiene en 2.15.4 (la v3 no fue aprobada). `vite.config.js` acepta `API_TARGET` para apuntar el proxy a otro backend (por defecto `127.0.0.1:8000`).
 
-## Fase 4 — Agente
-- [ ] Configurar Gemini.
-- [ ] Implementar herramientas de consulta.
-- [ ] Integrar function calling.
-- [ ] Crear endpoint de chat.
-- [ ] Construir interfaz conversacional.
+## Fase 4 — Agente ✅ (2026-10-28)
+- [x] Configurar Gemini. — SDK oficial `google-genai` (`app/agente/agente.py`). Clave solo desde `GEMINI_API_KEY` (entorno); modelo `GEMINI_MODEL` (por defecto `gemini-2.5-flash`); `GEMINI_TIMEOUT_S` (30 s) vía `HttpOptions.timeout`, sin reintentos automáticos.
+- [x] Implementar herramientas de consulta. — `app/agente/herramientas.py`: `consultar_resumen_ventas`, `consultar_ventas_por_producto` (incluye productos sin ventas y % de participación), `consultar_ventas_por_categoria`. Consultan SQLite con SQLAlchemy a través de `services/indicadores.py` (misma fuente que el dashboard). Lista blanca de nombres, sin parámetros declarados y se rechaza cualquier argumento → no hay vía para SQL arbitrario. Solo lectura.
+- [x] Integrar function calling. — Bucle manual (`automatic_function_calling.disable=True`): el modelo propone, el backend valida y ejecuta, el resultado vuelve como `function_response`. Máx. 5 pasos. Instrucciones de sistema: cifras solo de herramientas, declarar faltas de datos (`hay_datos=false`), interpretar y recomendar citando cifras, explicar que no hay filtro por período.
+- [x] Crear endpoint de chat. — `POST /api/agente/chat` con Pydantic: `SolicitudChat {mensaje (1..2000), historial (≤ 20 turnos, rol usuario|modelo)}`, `extra="forbid"`; `RespuestaChat {respuesta, herramientas_usadas [nombre, argumentos, resultado], fundamentada}`.
+  - Errores → HTTP: sin clave 503 · autenticación (401/403/`API_KEY_INVALID`) 503 · cuota (429/`RESOURCE_EXHAUSTED`) 429 · timeout 504 · modelo inexistente / 5xx / conexión 502 · respuesta vacía o cortada 502 · bloqueo de seguridad 422 · inesperado 500. Mensajes fijos: nunca se reenvía el texto del proveedor; el log registra solo tipo y código.
+- [x] Construir interfaz conversacional. — `AgentPanel` habilitado: sugerencias, historial (10 turnos), Enter para enviar, estado "Consultando datos…", errores en burbuja, línea "Datos consultados: …" o aviso "Respuesta sin consulta a datos". `TextoAgente` muestra listas y negritas sin `innerHTML`.
+
+**Evidencia:**
+- `pytest`: **71/71 OK** (4,8 s). Nuevo `tests/test_agente.py` (46 casos) con **Gemini simulado** usando los tipos reales del SDK. Sin red ni costo.
+  - Herramientas: cifras iguales a `/api/indicadores`; producto sin ventas incluido; `hay_datos=false` con base vacía; nombres fuera de la lista blanca y argumentos (`{"sql": "DELETE…"}`) rechazados sin modificar registros.
+  - Bucle: llamada → resultado real de SQLite enviado como `function_response` → respuesta; varias llamadas en un turno; límite de pasos; historial con roles correctos; texto de "pensamiento" oculto.
+  - Vacías/bloqueadas: sin candidatos, texto vacío, SAFETY, MAX_TOKENS, prompt bloqueado, `None`.
+  - Errores: 401, 403, 400 `API_KEY_INVALID`, 429, 404, 400 genérico, 503, `httpx.ReadTimeout`, `TimeoutError`, `ConnectError`, excepción genérica. La clave nunca aparece en los mensajes, en `/api/health` ni en `/openapi.json`.
+  - Endpoint: 503 sin clave, 200 con agente simulado, 7 casos de validación 422.
+- Llamada **real** a Gemini con clave inválida: la API devolvió `ClientError 400 (API_KEY_INVALID)` → HTTP 503 "no pudo autenticarse…", sin la clave en el mensaje.
+- De punta a punta (backend temporal + base aparte + Gemini simulado, vía proxy de Vite): `/api/health` → `agent_configured: true`; chat → 200, `fundamentada: true`, herramienta `consultar_ventas_por_categoria`, respuesta con Computación $18.209.690 (51,6%); mensaje vacío → 422. Captura con Edge (DevTools): conversación renderizada con negrita, lista y fuentes.
+- `npm run build`: OK.
+- Sin dependencias nuevas: `httpx` (para detectar timeouts) y `websockets` (solo verificación manual) vienen con `google-genai`.
+- **Pendiente:** probar con una `GEMINI_API_KEY` real (necesaria para respuestas reales del modelo).
 
 ## Fase 5 — Calidad
 - [ ] Ejecutar pytest.
