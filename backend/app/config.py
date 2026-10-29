@@ -6,6 +6,27 @@ from pathlib import Path
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 
+def cargar_env(ruta: Path) -> None:
+    """Carga líneas CLAVE=valor de un archivo .env (sin dependencias externas).
+
+    Las variables ya definidas en el entorno tienen prioridad y no se sobrescriben.
+    """
+    if not ruta.is_file():
+        return
+    for linea in ruta.read_text(encoding="utf-8-sig").splitlines():
+        linea = linea.strip()
+        if not linea or linea.startswith("#") or "=" not in linea:
+            continue
+        clave, valor = (p.strip() for p in linea.split("=", 1))
+        if len(valor) >= 2 and valor[0] == valor[-1] and valor[0] in "\"'":
+            valor = valor[1:-1]
+        if clave and valor and clave not in os.environ:
+            os.environ[clave] = valor
+
+
+cargar_env(BACKEND_DIR / ".env")
+
+
 @dataclass(frozen=True)
 class Settings:
     gemini_api_key: str = field(default_factory=lambda: os.getenv("GEMINI_API_KEY", "").strip(), repr=False)
