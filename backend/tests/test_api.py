@@ -60,6 +60,11 @@ def test_listar_ventas_ordenadas_por_fecha_desc(client, datos_conocidos):
     assert client.get("/api/ventas", params={"limit": 0}).status_code == 422
 
 
+def test_raiz_redirige_a_docs(client):
+    r = client.get("/", follow_redirects=False)
+    assert r.status_code == 307 and r.headers["location"] == "/docs"
+
+
 def test_endpoints_responden_json(client, datos_conocidos):
     for ruta in ("/api/productos", "/api/ventas", "/api/indicadores", "/api/health"):
         r = client.get(ruta)

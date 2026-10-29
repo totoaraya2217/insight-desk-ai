@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from .config import settings
 from .database import init_db
@@ -34,6 +34,12 @@ async def _no_encontrado(_: Request, exc: NoEncontradoError):
 @app.exception_handler(ReglaNegocioError)
 async def _regla_negocio(_: Request, exc: ReglaNegocioError):
     return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"detail": str(exc)})
+
+
+@app.get("/", include_in_schema=False)
+def raiz():
+    # La API no tiene página propia; se redirige a la documentación interactiva.
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/api/health")
