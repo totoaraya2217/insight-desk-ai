@@ -1,0 +1,23 @@
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Base de datos local
+*.db
+*.sqlite3
+
+# Node
+node_modules/
+dist/
+
+# Editor / SO
+.vscode/
+.DS_Store
+Thumbs.db

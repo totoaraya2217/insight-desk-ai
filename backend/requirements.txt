@@ -1,0 +1,6 @@
+# Dependencias autorizadas (spec.md + uvicorn aprobado en Fase 1)
+fastapi>=0.115
+uvicorn>=0.32
+sqlalchemy>=2.0.36
+google-genai>=1.20
+pytest>=8.3
