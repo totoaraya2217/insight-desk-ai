@@ -75,7 +75,9 @@
 - De punta a punta (backend temporal + base aparte + Gemini simulado, vía proxy de Vite): `/api/health` → `agent_configured: true`; chat → 200, `fundamentada: true`, herramienta `consultar_ventas_por_categoria`, respuesta con Computación $18.209.690 (51,6%); mensaje vacío → 422. Captura con Edge (DevTools): conversación renderizada con negrita, lista y fuentes.
 - `npm run build`: OK.
 - Sin dependencias nuevas: `httpx` (para detectar timeouts) y `websockets` (solo verificación manual) vienen con `google-genai`.
-- **Pendiente:** probar con una `GEMINI_API_KEY` real (necesaria para respuestas reales del modelo).
+- **Con clave real (2026-10-28):** `gemini-3.8-flash` y `gemini-3.7-flash` respondían `504 DEADLINE_EXCEEDED` (saturados); `gemini-2.5-flash` ya no existe (404). El agente funciona con `gemini-3.6-flash` (9 s), `gemini-3.5-flash` (9 s) y `gemini-3-flash-preview` (4 s): llama a la herramienta y responde con cifras de SQLite. Se fijó `GEMINI_MODEL=gemini-3.6-flash` en `backend/.env`.
+  - Corrección: el 504 `DEADLINE_EXCEEDED` del servidor se mostraba como "servicio no disponible"; ahora devuelve HTTP 504 "tardó demasiado (modelo saturado)". 73/73 pruebas OK.
+  - `backend/.env` se carga automáticamente desde `config.py` (sin python-dotenv); las variables del entorno tienen prioridad.
 
 ## Fase 5 — Calidad
 - [ ] Ejecutar pytest.

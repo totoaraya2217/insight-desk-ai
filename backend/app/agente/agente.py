@@ -74,6 +74,9 @@ def traducir_error(exc: Exception) -> AgenteError:
             return AgenteError(429, "Se alcanzó el límite de uso de Gemini. Intenta más tarde.")
         if code == 404:
             return AgenteError(502, "El modelo de Gemini configurado no está disponible.")
+        if code == 504 or status == "DEADLINE_EXCEEDED":
+            # El servidor de Gemini agotó su plazo (modelo saturado o lento).
+            return AgenteError(504, "Gemini tardó demasiado en responder (modelo saturado). Intenta nuevamente o usa otro modelo.")
         if isinstance(exc, errors.ServerError):
             return AgenteError(502, "El servicio de Gemini no está disponible en este momento.")
         return AgenteError(502, "Gemini rechazó la solicitud.")

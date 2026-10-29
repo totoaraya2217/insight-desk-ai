@@ -229,6 +229,7 @@ def _client_error(code, status, mensaje):
         (_client_error(404, "NOT_FOUND", "model not found"), 502, "modelo"),
         (_client_error(400, "INVALID_ARGUMENT", "bad request"), 502, "rechazó"),
         (errors.ServerError(503, {"error": {"code": 503, "status": "UNAVAILABLE", "message": "overloaded"}}), 502, "no está disponible"),
+        (errors.ServerError(504, {"error": {"code": 504, "status": "DEADLINE_EXCEEDED", "message": "Deadline expired"}}), 504, "tardó demasiado"),
         (httpx.ReadTimeout("timed out"), 504, "tardó demasiado"),
         (TimeoutError(), 504, "tardó demasiado"),
         (httpx.ConnectError("dns failure"), 502, "conectar"),
