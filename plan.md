@@ -38,11 +38,23 @@
 - Sin dependencias nuevas. `TestClient` usa `httpx`, que ya instala `google-genai` (dependencia transitiva, no declarada).
 - Corrección: la prueba de humo de Fase 1 usaba `route.path`, que falla con routers incluidos en FastAPI 0.162; ahora valida rutas vía OpenAPI.
 
-## Fase 3 — Frontend
-- [ ] Construir dashboard.
-- [ ] Mostrar indicadores y gráficos.
-- [ ] Crear formulario de ventas.
-- [ ] Conectar frontend con backend.
+## Fase 3 — Frontend ✅ (2026-10-28)
+- [x] Construir dashboard. — Layout con cabecera, área principal y panel lateral del agente (sticky; pasa abajo en < 1100 px y a una columna en móvil). Modo claro/oscuro por `prefers-color-scheme`.
+- [x] Mostrar indicadores y gráficos. — KPI de ingresos totales, unidades vendidas y ticket promedio; gráfico Recharts de ingresos por categoría (barras horizontales, una serie, tooltip, etiquetas de valor y vista "Ver como tabla"); tabla de las 10 ventas más recientes.
+- [x] Crear formulario de ventas. — Producto, cantidad y fecha (máx. hoy). Envía solo `producto_id`, `cantidad` y `fecha`; el total mostrado tras guardar es el que devuelve el backend. Muestra errores 422/404 del backend.
+- [x] Conectar frontend con backend. — Solo `GET /api/indicadores`, `GET /api/ventas?limit=10`, `GET /api/productos`, `POST /api/ventas` y `GET /api/health`, vía proxy `/api` de Vite. Sin datos simulados. Al registrar una venta se recargan KPI, gráfico y tabla.
+- [x] Panel lateral para el futuro agente. — Marcador "Próximamente" con entrada deshabilitada; muestra si la clave de Gemini está configurada (`/api/health`). Sin integración con Gemini.
+
+**Componentes reutilizables** (`frontend/src`): `api.js` (cliente único + mensajes de error), `hooks/useApi.js` (carga/error/recarga), `Panel` (título + estados de carga, error y vacío), `Estados` (`EstadoCarga`, `EstadoError` con "Reintentar", `EstadoVacio`), `KpiCard`, `KpiRow`, `CategoryChart`, `SalesTable`, `SaleForm`, `AgentPanel`, `format.js`.
+
+**Evidencia:**
+- `npm run build`: OK, sin advertencias. Corrección: el bundle único pesaba 540 kB (> límite de 500 kB de Vite) → separado por librería; el mayor chunk ahora es recharts con 231 kB.
+- Contra el backend del usuario (solo GET, vía proxy de `vite preview`): KPI $35.313.570 · 143 unidades · $706.271,40; coinciden con `/api/indicadores`.
+- Backend temporal con base en carpeta temporal (sin tocar `insightdesk.db`): `POST /api/ventas` vía proxy → venta #51, total $1.799.980 con precio tomado del producto; POST con cantidad 0 → 422; tras el POST, el dashboard muestra 51 ventas, $37.113.550 y la venta en la tabla (captura con Edge headless).
+- Backend apagado (proxy a puerto vacío): cada panel muestra "El backend no responde…" con botón Reintentar; KPI en "—"; panel del agente "sin conexión".
+- Correcciones visuales tras revisar capturas: ticket promedio con 2 decimales ($706.271,40); etiqueta "$2 M" ya no se parte en dos líneas.
+- `pytest` backend: 25/25 OK (sin cambios en backend).
+- Recharts se mantiene en 2.15.4 (la v3 no fue aprobada). `vite.config.js` acepta `API_TARGET` para apuntar el proxy a otro backend (por defecto `127.0.0.1:8000`).
 
 ## Fase 4 — Agente
 - [ ] Configurar Gemini.
