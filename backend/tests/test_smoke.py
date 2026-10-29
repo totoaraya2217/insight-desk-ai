@@ -5,8 +5,11 @@ from app import main
 from app.config import Settings
 
 
-def test_app_registers_health_route():
-    paths = {route.path for route in main.app.routes}
+def test_app_registers_spec_routes():
+    paths = main.app.openapi()["paths"]
+    assert set(paths["/api/productos"]) == {"get", "post"}
+    assert set(paths["/api/ventas"]) == {"get", "post"}
+    assert set(paths["/api/indicadores"]) == {"get"}
     assert "/api/health" in paths
 
 

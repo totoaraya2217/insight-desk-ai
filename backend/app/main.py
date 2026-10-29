@@ -1,9 +1,22 @@
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from .config import settings
+from .database import init_db
+from .errors import NoEncontradoError, ReglaNegocioError
+from .routers import indicadores, productos, ventas
 
-app = FastAPI(title="InsightDesk AI", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(title="InsightDesk AI", version="0.2.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -13,7 +26,21 @@ app.add_middleware(
 )
 
 
+@app.exception_handler(NoEncontradoError)
+async def _no_encontrado(_: Request, exc: NoEncontradoError):
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": str(exc)})
+
+
+@app.exception_handler(ReglaNegocioError)
+async def _regla_negocio(_: Request, exc: ReglaNegocioError):
+    return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"detail": str(exc)})
+
+
 @app.get("/api/health")
 def health() -> dict:
     # Indica si el agente tiene clave configurada, sin revelarla.
     return {"status": "ok", "agent_configured": bool(settings.gemini_api_key)}
+
+
+for r in (productos.router, ventas.router, indicadores.router):
+    app.include_router(r)
