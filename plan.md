@@ -1,9 +1,9 @@
 # plan.md — Plan de implementación
 
-## Fase 1 — Inicialización ✅ (2026-10-28, salvo Git)
+## Fase 1 — Inicialización ✅ (2026-10-28)
 - [x] Crear frontend React + Vite.
 - [x] Crear backend FastAPI.
-- [ ] Configurar Git y .gitignore. — `.gitignore` creado; **Git pendiente**: no está instalado en el equipo (lo instala el usuario).
+- [x] Configurar Git y .gitignore. — Git 2.56.0, rama `main`, commit inicial `59f56b8`.
 - [x] Instalar dependencias autorizadas.
 
 **Dependencias aprobadas:** las de spec.md + `uvicorn` (aprobado). No aprobadas: `httpx` y `python-dotenv`.
