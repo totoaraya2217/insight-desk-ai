@@ -79,12 +79,16 @@
   - Corrección: el 504 `DEADLINE_EXCEEDED` del servidor se mostraba como "servicio no disponible"; ahora devuelve HTTP 504 "tardó demasiado (modelo saturado)". 73/73 pruebas OK.
   - `backend/.env` se carga automáticamente desde `config.py` (sin python-dotenv); las variables del entorno tienen prioridad.
 
-## Fase 5 — Calidad
-- [ ] Ejecutar pytest.
-- [ ] Compilar frontend.
-- [ ] Validar manejo de errores.
-- [ ] Revisar seguridad de secretos.
-- [ ] Documentar ejecución en README.
+## Fase 5 — Calidad ✅ (2026-11-11)
+- [x] Ejecutar pytest. — **74/74 OK** (4,7 s).
+- [x] Compilar frontend. — `npm run build` OK, sin advertencias; mayor chunk recharts 231 kB.
+- [x] Validar manejo de errores. — Servidor real con base temporal y sin clave: venta válida 201 (precio desde el producto); cantidad 0, `precio_unitario` enviado, fecha futura y JSON roto → 422; producto 999 → 404; nombre duplicado → 409; chat sin clave → 503; ruta inexistente → 404. Log del servidor sin errores.
+  - Corrección: con el agente sin clave, un mensaje vacío devolvía 503 en lugar de 422 (la dependencia `get_agente` se resolvía antes que la validación del cuerpo). Ahora `get_agente` entrega un constructor perezoso que se invoca dentro del endpoint. Nueva prueba `test_chat_sin_clave_valida_entrada_primero`.
+- [x] Revisar seguridad de secretos. — `.env` y `.env.*` en `.gitignore`; ningún `.env` real en el índice ni en el historial; búsqueda de patrones `AIza…` en código e historial: solo la clave falsa de las pruebas. La clave tiene `repr=False` y no aparece en `/api/health`, `/openapi.json` ni en los mensajes de error (ya probado); el log solo registra tipo y código.
+  - Corrección: el modelo por defecto `gemini-2.5-flash` (inexistente, 404) pasa a `gemini-3.6-flash` en `config.py` y `.env.example`. `.env.example` tenía un comentario desactualizado ("no se carga automáticamente") y una `DATABASE_URL` relativa que cambiaba la ubicación de la base según la carpeta de arranque; ahora es opcional y está comentada.
+- [x] Documentar ejecución en README. — `README.md`: requisitos, instalación, configuración, ejecución, pruebas, API, códigos de error y agente.
+
+**Pendientes no bloqueantes:** decisión 4 (Recharts 3, sin aprobar) y decisión 5 (texto ajeno al final de spec.md).
 
 ## Regla de trabajo
 Codex debe implementar una fase a la vez, ejecutar las verificaciones correspondientes y actualizar este plan. No avanzar automáticamente si existen errores sin resolver.

@@ -30,7 +30,7 @@ cargar_env(BACKEND_DIR / ".env")
 @dataclass(frozen=True)
 class Settings:
     gemini_api_key: str = field(default_factory=lambda: os.getenv("GEMINI_API_KEY", "").strip(), repr=False)
-    gemini_model: str = field(default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
+    gemini_model: str = field(default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-3.6-flash"))
     gemini_timeout_s: float = field(default_factory=lambda: float(os.getenv("GEMINI_TIMEOUT_S", "30")))
     # Tope de rondas modelo→herramienta→modelo por pregunta (evita bucles y costos descontrolados).
     agente_max_pasos: int = 5

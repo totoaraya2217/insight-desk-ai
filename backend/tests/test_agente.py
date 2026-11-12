@@ -251,13 +251,18 @@ def test_traducir_error_es_idempotente():
 
 # --- Endpoint POST /api/agente/chat ---
 def _usar_agente(db, gemini):
-    app.dependency_overrides[agente_router.get_agente] = lambda: Agente(db, generar=gemini)
+    app.dependency_overrides[agente_router.get_agente] = lambda: (lambda: Agente(db, generar=gemini))
 
 
 def test_chat_sin_clave_responde_503(client, monkeypatch):
     monkeypatch.setattr(agente_router, "settings", dataclasses.replace(agente_router.settings, gemini_api_key=""))
     r = client.post("/api/agente/chat", json={"mensaje": "hola"})
     assert r.status_code == 503 and "GEMINI_API_KEY" in r.json()["detail"]
+
+
+def test_chat_sin_clave_valida_entrada_primero(client, monkeypatch):
+    monkeypatch.setattr(agente_router, "settings", dataclasses.replace(agente_router.settings, gemini_api_key=""))
+    assert client.post("/api/agente/chat", json={"mensaje": ""}).status_code == 422
 
 
 def test_chat_ok(client, db):
